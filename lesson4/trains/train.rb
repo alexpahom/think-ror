@@ -1,5 +1,5 @@
 class Train
-  attr_reader :speed, :route, :current_station_index, :number
+  attr_reader :speed, :type, :route, :current_station_index, :number
 
   def initialize(number)
     @number = number
@@ -16,7 +16,7 @@ class Train
   end
 
   def add_car(car)
-    @cars << car if speed == 0
+    @cars << car if speed == 0 && car.type == type
   end
 
   def unhook_car
@@ -46,8 +46,7 @@ class Train
   end
 
   private
-  # методы являются приватными, т.к. на данном этапе отсутствует функциональность для которой необходимо предоставлять такой интерфейс
-  
+
   def next_station
     route.stations[current_station_index + 1]
   end
