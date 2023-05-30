@@ -114,30 +114,34 @@ def get_train_from_user
   @trains.find { |train| train.number == train_number }
 end
 
-def initialize_menu
+def start
   loop do
     system 'cls'
     render_menu
     choice = gets.chomp
-    case choice
-    when '1'
-      create_train
-    when '2'
-      create_route
-    when '3'
-      assign_route
-    when '4'
-      add_car
-    when '5'
-      unhook_car
-    when '6'
-      move_train
-    when '7'
-      get_stations_and_trains
-    when '8'
-      return
-    end
+    action choice
   end
 end
 
-initialize_menu
+def action(choice)
+  case choice
+  when '1'
+    create_train
+  when '2'
+    create_route
+  when '3'
+    assign_route
+  when '4'
+    add_car
+  when '5'
+    unhook_car
+  when '6'
+    move_train
+  when '7'
+    get_stations_and_trains
+  when '8'
+    exit
+  end
+end
+
+start
