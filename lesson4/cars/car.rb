@@ -1,1 +1,3 @@
-class Car; end
+class Car
+  attr_reader :type
+end
