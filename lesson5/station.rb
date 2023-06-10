@@ -1,7 +1,9 @@
 load 'modules/instance_counter.rb'
+
 class Station
   include InstanceCounter
   attr_reader :trains, :name
+
   @@stations = []
   def self.all
     @@stations
