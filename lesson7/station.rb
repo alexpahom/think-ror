@@ -30,6 +30,10 @@ class Station
     false
   end
 
+  def within_trains(&block)
+    trains.each { |train| block.call(train) }
+  end
+
   private
 
   def validate!

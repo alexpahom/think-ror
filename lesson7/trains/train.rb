@@ -3,7 +3,7 @@ require_relative '../modules/instance_counter.rb'
 class Train
   include Manufacturer
   include InstanceCounter
-  attr_reader :speed, :type, :route, :current_station_index, :number
+  attr_reader :speed, :type, :route, :current_station_index, :number, :cars
 
   @@trains = []
   def self.find(number)
@@ -61,6 +61,10 @@ class Train
     validate!
   rescue
     false
+  end
+
+  def within_cars(&block)
+    cars.each { |car| block.call(car) }
   end
 
   private

@@ -4,9 +4,11 @@ require_relative 'trains/cargo_train.rb'
 require_relative 'trains/passenger_train.rb'
 require_relative 'cars/cargo_car.rb'
 require_relative 'cars/passenger_car.rb'
+require_relative 'seeds'
+require 'pry'
 
-@trains = []
-@routes = []
+@trains = Seeds.instance.trains
+@routes = Seeds.instance.routes
 
 def render_menu
   puts '1 - Создать поезд'
@@ -15,8 +17,9 @@ def render_menu
   puts '4 - Добавить вагон'
   puts '5 - Отцепить вагон'
   puts '6 - Переместить поезд'
-  puts '7 - Список станций'
-  puts '8 - Выход'
+  puts '7 - Информация о станциях и поездах'
+  puts '8 - Изменить вагон'
+  puts '9 - Выход'
 end
 
 def create_train
@@ -74,10 +77,28 @@ def add_car
   print_trains
   train = get_train_from_user
   if train.is_a? CargoTrain
-    train.add_car CargoCar.new
+    train.add_car(create_cargo_car)
   elsif train.is_a? PassengerTrain
-    train.add_car PassengerCar.new
+    train.add_car(create_passenger_car)
   end
+end
+
+def create_cargo_car
+  print 'Введите максимальную вместимость: '
+  car_load = gets.chomp
+  CargoCar.new(car_load)
+rescue Exception => e
+  puts e.message
+  retry
+end
+
+def create_passenger_car
+  print 'Введите количество мест в вагоне: '
+  max_seats = gets.chomp
+  PassengerCar.new(max_seats)
+rescue Exception => e
+  puts e.message
+  retry
 end
 
 def unhook_car
@@ -101,13 +122,33 @@ def get_stations_and_trains
   @routes.each do |route|
     puts "Маршрут: #{route.start_station.name} - #{route.end_station.name}"
     route.stations.each do |station|
-      print "\tСтанция: #{station.name} "
-      trains = station.trains.map { |train| train.number }
-      trains = ['отсутствуют'] if trains.empty?
-      puts "\tПоезда: #{trains.join(', ')} "
+      puts "\tСтанция: #{station.name}"
+      print_station_info(station)
     end
   end
   gets
+end
+
+def print_station_info(station)
+  if station.trains.empty?
+    puts "Поезда отсутствуют"
+    return
+  end
+  station.within_trains do |train|
+    puts "\tПоезд номер: #{train.number} Тип: #{train.type} Кол-во вагонов: #{train.cars.count}"
+    print_train_info train
+  end
+end
+
+def print_train_info(train)
+  puts "\t\tВагоны:"
+  train.within_cars do |car|
+    if car.is_a? PassengerCar
+      puts "\t\tНомер:#{car.number} Тип:#{car.type} Мест занято:#{car.seats_taken_number} Мест свободно:#{car.vacant_seats_number}"
+    elsif car.is_a? CargoCar
+      puts "\t\tНомер:#{car.number} Тип:#{car.type} Объема занято:#{car.loaded} Объема свободно:#{car.free_load}"
+    end
+  end
 end
 
 def print_trains
@@ -126,6 +167,34 @@ def get_train_from_user
   print 'Введите номер поезда: '
   train_number = gets.chomp
   @trains.find { |train| train.number == train_number }
+end
+
+def adjust_car
+  cars = @trains.map(&:cars).flatten
+  puts "Доступные вагоны: #{cars.map(&:number).join(', ')}"
+  print 'Введите номер вагона: '
+  car_number = gets.chomp
+  car = cars.find { |car| car.number == car_number.to_i }
+  if car.is_a? PassengerCar
+    book_seat car
+  else
+    load_car car
+  end
+end
+
+def book_seat(car)
+  car.take_seat
+  print 'Место зарезервировано!'
+  gets
+end
+
+def load_car(car)
+  print 'Введите кол-во занимаемого объема: '
+  load_amount = gets.chomp
+  car.load_car load_amount
+rescue Exception => e
+  puts e.message
+  retry
 end
 
 def start
@@ -155,6 +224,8 @@ def action(choice)
   when '7'
     get_stations_and_trains
   when '8'
+    adjust_car
+  when '9'
     exit
   end
 end
