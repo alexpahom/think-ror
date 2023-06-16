@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 load '../modules/manufacturer.rb'
 class Car
   include Manufacturer

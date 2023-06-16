@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'route'
 require_relative 'trains/cargo_train'
 require_relative 'trains/passenger_train'
@@ -10,6 +12,16 @@ class Seeds
   include Singleton
   attr_reader :trains, :routes
 
+  STATION_NAMES = [
+    'Minsk',
+    'Moscow',
+    'Paris',
+    'New Orleans',
+    'Hamburg',
+    'California',
+    'Washington D.C.'
+  ].freeze
+
   def initialize
     @routes = []
     @trains = []
@@ -19,15 +31,7 @@ class Seeds
   end
 
   def create_route
-    stations = [
-      'Minsk',
-      'Moscow',
-      'Paris',
-      'New Orleans',
-      'Hamburg',
-      'California',
-      'Washington D.C.',
-    ].map do |city|
+    stations = STATION_NAMES.map do |city|
       Station.new city
     end.shuffle
     route = Route.new(stations.pop, stations.pop)

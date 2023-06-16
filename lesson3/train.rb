@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class Train
   attr_reader :speed, :cars_number, :route, :type
-  
+
   def initialize(number, type, cars_number)
     @number = number
     @type = type
@@ -17,11 +19,11 @@ class Train
   end
 
   def add_car
-     @cars_number += 1 if speed == 0
+    @cars_number += 1 if speed.zero?
   end
 
   def unhook_car
-    @cars_number -= 1 unless cars_number == 0
+    @cars_number -= 1 unless cars_number.zero?
   end
 
   def assign_route(route)
@@ -40,11 +42,11 @@ class Train
   def next_station
     route.stations[current_station_index + 1]
   end
-  
+
   def previous_station
     route.stations[current_station_index - 1]
   end
-  
+
   def current_station
     route.stations[current_station_index]
   end

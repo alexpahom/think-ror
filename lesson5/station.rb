@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 load 'modules/instance_counter.rb'
 
 class Station
@@ -8,6 +10,7 @@ class Station
   def self.all
     @@stations
   end
+
   def initialize(name)
     @name = name
     @trains = []

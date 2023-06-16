@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Сделать хеш, содержащий месяцы и количество дней в месяце. В цикле выводить те месяцы, у которых количество дней ровно 30
 months = {
   january: 31,
@@ -11,7 +13,7 @@ months = {
   september: 30,
   october: 31,
   november: 30,
-  december: 31,
+  december: 31
 }
 
 months.each do |month, days|

@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 require_relative 'car'
 
 class CargoCar < Car
   attr_reader :loaded
+
   def initialize(max_load)
     @type = :cargo
     @max_load = max_load.to_i
@@ -12,6 +15,7 @@ class CargoCar < Car
 
   def load_car(amount)
     raise "Нельзя превышать объем! (#{loaded} / #{@max_load})" if @loaded + amount.to_i > @max_load
+
     @loaded += amount.to_i
   end
 

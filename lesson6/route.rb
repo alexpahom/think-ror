@@ -1,4 +1,6 @@
-require_relative 'modules/instance_counter.rb'
+# frozen_string_literal: true
+
+require_relative 'modules/instance_counter'
 
 class Route
   include InstanceCounter
@@ -26,15 +28,15 @@ class Route
 
   def valid?
     validate!
-  rescue
+  rescue StandardError
     false
   end
 
   private
 
   def validate!
-    if [start_station, end_station].any? { |station| !station.is_a? Station }
-      raise 'Необходимы станции для создания маршрута'
-    end
+    return unless [start_station, end_station].any? { |station| !station.is_a? Station }
+
+    raise 'Необходимы станции для создания маршрута'
   end
 end

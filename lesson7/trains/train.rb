@@ -1,13 +1,23 @@
-require_relative '../modules/manufacturer.rb'
-require_relative '../modules/instance_counter.rb'
+# frozen_string_literal: true
+
+require_relative '../modules/manufacturer'
+require_relative '../modules/instance_counter'
 class Train
   include Manufacturer
   include InstanceCounter
   attr_reader :speed, :type, :route, :current_station_index, :number, :cars
 
-  @@trains = []
+  def self.all_trains
+    @trains
+  end
+
+  def self.add_train(train)
+    @trains ||= []
+    @trains << train
+  end
+
   def self.find(number)
-    @@trains.find { |train| train.number == number }
+    all_trains.find { |train| train.number == number }
   end
 
   def initialize(number)
@@ -15,7 +25,7 @@ class Train
     @cars = []
     @speed = 0
     validate!
-    @@trains << self
+    self.class.add_train self
     register_instance
   end
 
@@ -28,7 +38,7 @@ class Train
   end
 
   def add_car(car)
-    @cars << car if speed == 0 && car.type == type
+    @cars << car if speed.zero? && car.type == type
   end
 
   def unhook_car
@@ -42,24 +52,24 @@ class Train
   end
 
   def go_to_next_station
-    if next_station
-      current_station.departure self
-      @current_station_index += 1
-      current_station.arrival self
-    end
+    return unless next_station
+
+    current_station.departure self
+    @current_station_index += 1
+    current_station.arrival self
   end
 
   def go_to_previous_station
-    if previous_station
-      current_station.departure self
-      @current_station_index -= 1
-      current_station.arrival self
-    end
+    return unless previous_station
+
+    current_station.departure self
+    @current_station_index -= 1
+    current_station.arrival self
   end
 
   def valid?
     validate!
-  rescue
+  rescue StandardError
     false
   end
 

@@ -1,9 +1,11 @@
-require_relative 'station.rb'
-require_relative 'route.rb'
-require_relative 'trains/cargo_train.rb'
-require_relative 'trains/passenger_train.rb'
-require_relative 'cars/cargo_car.rb'
-require_relative 'cars/passenger_car.rb'
+# frozen_string_literal: true
+
+require_relative 'station'
+require_relative 'route'
+require_relative 'trains/cargo_train'
+require_relative 'trains/passenger_train'
+require_relative 'cars/cargo_car'
+require_relative 'cars/passenger_car'
 
 @trains = []
 @routes = []
@@ -48,6 +50,7 @@ def create_route
     print 'Введите название промежуточной станции или "стоп" для выхода: '
     station_name = gets.chomp
     break if station_name == 'стоп'
+
     route.add_station(station_name)
   end
   @routes << route
@@ -97,12 +100,12 @@ def move_train
   end
 end
 
-def get_stations_and_trains
+def stations_and_trains
   @routes.each do |route|
     puts "Маршрут: #{route.start_station.name} - #{route.end_station.name}"
     route.stations.each do |station|
       print "\tСтанция: #{station.name} "
-      trains = station.trains.map { |train| train.number }
+      trains = station.trains.map(&:number)
       trains = ['отсутствуют'] if trains.empty?
       puts "\tПоезда: #{trains.join(', ')} "
     end
@@ -153,7 +156,7 @@ def action(choice)
   when '6'
     move_train
   when '7'
-    get_stations_and_trains
+    stations_and_trains
   when '8'
     exit
   end

@@ -1,5 +1,7 @@
-require_relative '../modules/manufacturer.rb'
-require_relative '../modules/instance_counter.rb'
+# frozen_string_literal: true
+
+require_relative '../modules/manufacturer'
+require_relative '../modules/instance_counter'
 class Train
   include Manufacturer
   include InstanceCounter
@@ -28,7 +30,7 @@ class Train
   end
 
   def add_car(car)
-    @cars << car if speed == 0 && car.type == type
+    @cars << car if speed.zero? && car.type == type
   end
 
   def unhook_car
@@ -42,24 +44,24 @@ class Train
   end
 
   def go_to_next_station
-    if next_station
-      current_station.departure self
-      @current_station_index += 1
-      current_station.arrival self
-    end
+    return unless next_station
+
+    current_station.departure self
+    @current_station_index += 1
+    current_station.arrival self
   end
 
   def go_to_previous_station
-    if previous_station
-      current_station.departure self
-      @current_station_index -= 1
-      current_station.arrival self
-    end
+    return unless previous_station
+
+    current_station.departure self
+    @current_station_index -= 1
+    current_station.arrival self
   end
 
   def valid?
     validate!
-  rescue
+  rescue StandardError
     false
   end
 

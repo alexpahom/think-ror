@@ -1,4 +1,6 @@
-require_relative 'modules/instance_counter.rb'
+# frozen_string_literal: true
+
+require_relative 'modules/instance_counter'
 
 class Station
   include InstanceCounter
@@ -8,6 +10,7 @@ class Station
   def self.all
     @@stations
   end
+
   def initialize(name)
     @name = name
     @trains = []
@@ -26,7 +29,7 @@ class Station
 
   def valid?
     validate!
-  rescue
+  rescue StandardError
     false
   end
 

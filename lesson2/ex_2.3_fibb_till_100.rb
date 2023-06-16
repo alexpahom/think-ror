@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # 3. Заполнить массив числами фибоначчи до 100
 arr = []
 first_num = 0

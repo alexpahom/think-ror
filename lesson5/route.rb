@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 load 'modules/instance_counter.rb'
 
 class Route

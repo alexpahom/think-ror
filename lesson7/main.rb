@@ -1,9 +1,11 @@
-require_relative 'station.rb'
-require_relative 'route.rb'
-require_relative 'trains/cargo_train.rb'
-require_relative 'trains/passenger_train.rb'
-require_relative 'cars/cargo_car.rb'
-require_relative 'cars/passenger_car.rb'
+# frozen_string_literal: true
+
+require_relative 'station'
+require_relative 'route'
+require_relative 'trains/cargo_train'
+require_relative 'trains/passenger_train'
+require_relative 'cars/cargo_car'
+require_relative 'cars/passenger_car'
 require_relative 'seeds'
 require 'pry'
 
@@ -25,40 +27,54 @@ end
 def create_train
   print 'Введите номер поезда: '
   number = gets.chomp
-  print 'Введите тип поезда (пассажирский/грузовой): '
-  type = gets.chomp.downcase
-  if type == 'пассажирский'
-    @trains << PassengerTrain.new(number)
-  elsif type == 'грузовой'
-    @trains << CargoTrain.new(number)
-  else
-    raise 'Неверный тип поезда'
-  end
-  puts "Создан #{type} поезд, номер #{number}"
-  gets
-rescue Exception => e
+  type = train_type_input
+  create_train_with_params(number, type)
+rescue RuntimeError => e
   puts e.message
   retry
 end
 
+def train_type_input
+  print 'Введите тип поезда (пассажирский/грузовой): '
+  type = gets.chomp.downcase
+  raise 'Неверный тип поезда' if %w[пассажирский грузовой].none? type
+
+  type
+end
+
+def create_train_with_params(number, type)
+  if type == 'пассажирский'
+    @trains << PassengerTrain.new(number)
+  elsif type == 'грузовой'
+    @trains << CargoTrain.new(number)
+  end
+  puts "Создан #{type} поезд, номер #{number}"
+  gets
+end
+
 def create_route
-  print 'Введите начальную станцию маршрута: '
-  start_station = create_station(gets.chomp)
-  print 'Введите конечную станцию маршрута: '
-  end_station = create_station(gets.chomp)
-  route = Route.new(start_station, end_station)
+  route = create_base_route
   loop do
     print 'Введите название промежуточной станции или "стоп" для выхода: '
     station_name = gets.chomp
     break if station_name == 'стоп'
+
     route.add_station(station_name)
   end
   @routes << route
 end
 
+def create_base_route
+  print 'Введите начальную станцию маршрута: '
+  start_station = create_station(gets.chomp)
+  print 'Введите конечную станцию маршрута: '
+  end_station = create_station(gets.chomp)
+  Route.new(start_station, end_station)
+end
+
 def create_station(name)
   Station.new(name)
-rescue Exception => e
+rescue RuntimeError => e
   puts e.message
   print 'Введите новое значение: '
   retry
@@ -87,7 +103,7 @@ def create_cargo_car
   print 'Введите максимальную вместимость: '
   car_load = gets.chomp
   CargoCar.new(car_load)
-rescue Exception => e
+rescue RuntimeError => e
   puts e.message
   retry
 end
@@ -96,7 +112,7 @@ def create_passenger_car
   print 'Введите количество мест в вагоне: '
   max_seats = gets.chomp
   PassengerCar.new(max_seats)
-rescue Exception => e
+rescue RuntimeError => e
   puts e.message
   retry
 end
@@ -118,7 +134,7 @@ def move_train
   end
 end
 
-def get_stations_and_trains
+def stations_and_trains
   @routes.each do |route|
     puts "Маршрут: #{route.start_station.name} - #{route.end_station.name}"
     route.stations.each do |station|
@@ -131,7 +147,7 @@ end
 
 def print_station_info(station)
   if station.trains.empty?
-    puts "Поезда отсутствуют"
+    puts 'Поезда отсутствуют'
     return
   end
   station.within_trains do |train|
@@ -144,7 +160,8 @@ def print_train_info(train)
   puts "\t\tВагоны:"
   train.within_cars do |car|
     if car.is_a? PassengerCar
-      puts "\t\tНомер:#{car.number} Тип:#{car.type} Мест занято:#{car.seats_taken_number} Мест свободно:#{car.vacant_seats_number}"
+      puts "\t\tНомер:#{car.number} Тип:#{car.type} Мест занято:#{car.seats_taken_number}" \
+           " Мест свободно:#{car.vacant_seats_number}"
     elsif car.is_a? CargoCar
       puts "\t\tНомер:#{car.number} Тип:#{car.type} Объема занято:#{car.loaded} Объема свободно:#{car.free_load}"
     end
@@ -163,7 +180,7 @@ def print_routes
   end
 end
 
-def get_train_from_user
+def train_from_user
   print 'Введите номер поезда: '
   train_number = gets.chomp
   @trains.find { |train| train.number == train_number }
@@ -174,11 +191,11 @@ def adjust_car
   puts "Доступные вагоны: #{cars.map(&:number).join(', ')}"
   print 'Введите номер вагона: '
   car_number = gets.chomp
-  car = cars.find { |car| car.number == car_number.to_i }
-  if car.is_a? PassengerCar
-    book_seat car
+  new_car = cars.find { |car| car.number == car_number.to_i }
+  if new_car.is_a? PassengerCar
+    book_seat new_car
   else
-    load_car car
+    load_car new_car
   end
 end
 
@@ -192,7 +209,7 @@ def load_car(car)
   print 'Введите кол-во занимаемого объема: '
   load_amount = gets.chomp
   car.load_car load_amount
-rescue Exception => e
+rescue RuntimeError => e
   puts e.message
   retry
 end
@@ -208,26 +225,22 @@ def start
 end
 
 def action(choice)
-  case choice
-  when '1'
-    create_train
-  when '2'
-    create_route
-  when '3'
-    assign_route
-  when '4'
-    add_car
-  when '5'
-    unhook_car
-  when '6'
-    move_train
-  when '7'
-    get_stations_and_trains
-  when '8'
-    adjust_car
-  when '9'
-    exit
-  end
+  # {
+  #   '1': proc { create_train },
+  #   '2': proc { create_route },
+  #   '3': proc { assign_route },
+  #   '4': proc { add_car },
+  #   '5': proc { unhook_car },
+  #   '6': proc { move_train },
+  #   '7': proc { stations_and_trains },
+  #   '8': proc { adjust_car },
+  #   '9': proc { exit }
+  # }[choice.to_sym].call
+  methods = %w[
+    create_train create_route assign_route add_car unhook_car
+    move_train stations_and_trains adjust_car exit
+  ]
+  send(methods[choice.to_i - 1])
 end
 
 start
